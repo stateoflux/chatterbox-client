@@ -24,10 +24,11 @@ var makeController = function() {
           // render messages when complete
           var messageHtml;
           _.each(messages, function(message) {
-            messageHtml = "<div class=\"message\"><p>" +
-            escapeHtml(message.username) + "</p><p>" +
-            escapeHtml(message.text) + "</p><p>" +
-            message.createdAt + "</p></div>"
+            messageHtml = '<div class="message"><p class="username">' +
+            escapeHtml(message.username) + '</p><p class="text">' +
+            escapeHtml(message.text) + '</p><p>' +
+            '</p></div>'
+            // message.createdAt + "</p></div>"
             $('.chat-session').append($(messageHtml));
           });
         },
