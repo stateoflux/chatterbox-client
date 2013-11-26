@@ -1,44 +1,42 @@
 // YOUR CODE HERE:
 var url = "https://api.parse.com/1/classes/chatterbox";
-var messages; 
-var escapeHtml = function(text) {
-  var escText = document.createTextNode(text.slice(0, 200));
-  // debugger;
-  var p = document.createElement();
-  p.appendChild(escText);
-  return p.innerHTML;
-};
+var messages = []; 
+
 
 var makeController = function() {
   return {
+    promise: null,
     getMessages: function() {
-      $.ajax({
+      this.promise = $.ajax({
         // always use this url
-        url: url + "?order=-createdAt",
+        url: url + "?order=-createdAt" + "&limit=20",
         type: 'GET',
         contentType: 'application/json',
         success: function (data) {
           console.log(data);
-          messages = data.results;
-
-          // render messages when complete
-          var messageHtml;
-          _.each(messages, function(message) {
-            messageHtml = '<div class="message"><p class="username">' +
-            escapeHtml(message.username) + '</p><p class="text">' +
-            escapeHtml(message.text) + '</p><p>' +
-            '</p></div>'
-            // message.createdAt + "</p></div>"
-            $('.chat-session').append($(messageHtml));
+          _.each(data.results, function(message) {
+             messages.push(createMessage(message));
           });
-        },
+          // debugger;
+         },
         error: function (data) {
-          // see: https://developer.mozilla.org/en-US/docs/Web/API/console.error
-          console.error('chatterbox: Failed to receive messages');
+           console.error('chatterbox: Failed to receive messages');
         }
-      });   // end of ajax get
-    
+      });   // end of ajax get  
     },
+    renderMessages: function(){
+      this.promise.done(function() {
+        // debugger;
+        for (var i = messages.length - 1; i > messages.length - 20; i--) {
+          // debugger;
+          var msgHTML=  messages[i].renderMessage();
+          $chatSession = $('.chat-session');
+          $chatSession.append($(msgHTML));
+          $chatSession.prop('scrollTop', $chatSession.prop('scrollHeight'))
+        };   
+      });  
+    },
+  
     sendMessage: function(message) {
        $.ajax({
         // always use this url
@@ -55,26 +53,15 @@ var makeController = function() {
         }
       });   // end of ajax post
     }
-    // renderMessages: function() {
-    //   var messageHtml;
-    //   _.each(messages, function(message) {
-    //     debugger;
-    //     messageHtml = "<div><p>" +
-    //       message.username + "</p><p>" +
-    //       message.text + "</p><p>" +
-    //       message.createdAt + "</p></div>"
-    //       $('.chat-session').append($(messageHtml));
-    //   });
-    // } 
   }
 };
 
 $(document).ready(function() {
   var controller = makeController(url);
-  /* setInterval(function() {
-    controller.getMessages();
-  }, 2000); */
-  controller.getMessages();
+  setInterval(function() {
+    controller.getMessages()
+    controller.renderMessages();
+  }, 2000);
 
   $(".chat-input input[type=\"submit\"]").on("click", function(e){
     // debugger;
@@ -87,6 +74,4 @@ $(document).ready(function() {
       $(this).prev().val("");
      controller.sendMessage(message);
   })
-  // debugger;
-  //controller.renderMessages();
 });

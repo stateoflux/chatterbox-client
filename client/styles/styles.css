@@ -74,3 +74,8 @@ body {
     font-weight: 700;
     color: rgba(41, 128, 185,1.0);
 }
+.date {
+    font-size: 11px;
+    color: #888;
+    font-weight: 400;
+}
