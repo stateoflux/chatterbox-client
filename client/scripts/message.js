@@ -4,25 +4,18 @@ var createMessage = function(data){
     room: data.roomname,
     text: data.text,
     createdAt: data.createdAt,
-    renderMessage: function(){
+    renderMessage: function(room){
       // debugger;
-      var escapeHtml = function(text) {
-        if (text) {
-          var newText = text.slice(0, 200);
-          var escText = document.createTextNode(newText);
-          var p = document.createElement();
-          p.appendChild(escText);
-          return p.innerHTML;
-        }
-        return '';
-      };
-
+      room = room || 'all_rooms';
       var messageHtml = '<div class="message"><p class="username">' +
-        escapeHtml(this.username) + ' @ ' + '<span class="date">' + moment(this.createdAt).format('lll') + '</span></p><p class="text">' +
+        escapeHtml(this.username, 50) + ' @ ' + '<span class="date">' + moment(this.createdAt).format('lll') + '</span></p><p class="text">' +
         escapeHtml(this.text) + '</p><p>' +
         '</p></div>';
-      return messageHtml;
-
+      if (room === this.room || room === "all_rooms") {
+        return messageHtml;
+      } else  {
+        return '';
+      }
     }  // render
   };   // return
 };   // createMessage
