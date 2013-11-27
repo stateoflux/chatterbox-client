@@ -21,6 +21,7 @@ var escapeHtml = function(text, limit) {
 var makeController = function() {
   return {
     promise: null,
+    currentRoom: "all_rooms",
     getMessages: function() {
       this.promise = $.ajax({
         // always use this url
@@ -31,10 +32,7 @@ var makeController = function() {
           console.log(data);
           // debugger;
           _.each(data.results, function(message) {
-            // debugger;
-            if (rooms[message.roomname] === undefined) {
-              rooms[message.roomname] = 'not added';
-            }
+            rooms[message.roomname] = true;
             users[message.username] = true;
             messages.push(createMessage(message));
           });
@@ -45,13 +43,15 @@ var makeController = function() {
         }
       });   // end of ajax get  
     },
-    renderMessages: function(room){
+    renderMessages: function(){
       // debugger;
+      var that = this;
       this.promise.done(function() {
         // debugger;
         for (var i = messages.length - 1; i > messages.length - 20; i--) {
           // debugger;
-          var msgHTML=  messages[i].renderMessage(room);
+          console.log("renderMessages: " + that.currentRoom);
+          var msgHTML=  messages[i].renderMessage(that.currentRoom);
           $chatSession = $('.chat-session');
           if (msgHTML) {
             $chatSession.append($(msgHTML));
@@ -85,23 +85,27 @@ $(document).ready(function() {
     var selectStr = '';
     var escapedRoom = '';
     // debugger;
+    $('.dyn-room').remove();
     _.each(rooms, function(value, room){
-      //console.log(room, value);
-      if( value === 'not added'){
-        escapedRoom = escapeHtml(room, 20);
-        selectStr = '<option value="' + escapedRoom + '">' + escapedRoom + '</option>';
-        $('.rooms select').append($(selectStr));
-        value = 'added';
-      }
+      console.log(room);
+      escapedRoom = escapeHtml(room, 20);
+      selectStr = '<option class="dyn-room" value="' + escapedRoom + '">' + escapedRoom + '</option>';
+      $('.rooms select').append($(selectStr));
     });
   }
   // populateSelect();
-
+  var roomSelected = false;
   var controller = makeController(url);
+
+  // setTimeout(populateSelect, 5000);
+
   setInterval(function() {
     controller.getMessages()
+
     controller.renderMessages();
-    populateSelect();
+    if (!roomSelected) {
+      populateSelect();
+    }
   }, 2000);
   // populateSelect();
 
@@ -120,7 +124,17 @@ $(document).ready(function() {
 
   // Room pulldown select click handler
   // ==========================================================================
-
+   $('.rooms select').on('change', function(e) {
+      e.preventDefault;
+      var $selVal = $(this).val()
+      if ($selVal !== "all_rooms") {
+        // debugger;
+        controller.currentRoom = $selVal;
+        roomSelected = true;
+      } else {
+        roomSelected = false;
+      }
+   });
 
 
 
